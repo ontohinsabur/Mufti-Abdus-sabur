@@ -3,6 +3,11 @@
   "trailingSlash": true,
   "redirects": [
     {
+      "source": "/crm/:path*",
+      "destination": "https://muftiabdussabur-crm.vercel.app/",
+      "permanent": false
+    },
+    {
       "source": "/customer-portal/:path*",
       "destination": "https://crm.muftiabdussabur.com/",
       "permanent": false
