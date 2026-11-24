@@ -1,0 +1,84 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/customer-portal/:path*",
+      "destination": "https://crm.muftiabdussabur.com/",
+      "permanent": false
+    },
+    {
+      "source": "/my-account/:path*",
+      "destination": "https://crm.muftiabdussabur.com/",
+      "permanent": false
+    },
+    {
+      "source": "/cart/:path*",
+      "destination": "https://crm.muftiabdussabur.com/",
+      "permanent": false
+    },
+    {
+      "source": "/checkout/:path*",
+      "destination": "https://crm.muftiabdussabur.com/",
+      "permanent": false
+    },
+    {
+      "source": "/shop/:path*",
+      "destination": "/services/",
+      "permanent": false
+    },
+    {
+      "source": "/refund_returns/",
+      "destination": "/service-refund-policy/",
+      "permanent": true
+    },
+    {
+      "source": "/wp-admin/:path*",
+      "destination": "https://crm.muftiabdussabur.com/",
+      "permanent": false
+    },
+    {
+      "source": "/wp-login.php",
+      "destination": "https://crm.muftiabdussabur.com/",
+      "permanent": false
+    },
+    {
+      "source": "/feed/:path*",
+      "destination": "/blog/",
+      "permanent": false
+    }
+  ],
+  "headers": [
+    {
+      "source": "/mas-service-worker.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        },
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/"
+        }
+      ]
+    },
+    {
+      "source": "/mas-manifest.webmanifest",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json"
+        }
+      ]
+    },
+    {
+      "source": "/wp-content/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}
