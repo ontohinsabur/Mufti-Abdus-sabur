@@ -5,6 +5,7 @@ import TopBar from '@/components/TopBar';
 import StatusBadge from '@/components/StatusBadge';
 import OrderList from '@/components/OrderList';
 import Rates from './rates';
+import WaButton from '@/components/WaButton';
 import LedgerView from '@/components/LedgerView';
 import WalletView from '@/components/WalletView';
 import { PayLaterForm, AdjustForm } from '@/components/AdminMoney';
@@ -36,7 +37,8 @@ export default async function Customer({ params }) {
           <h1>{c.full_name || '(নাম নেই)'} <StatusBadge status={c.status} /></h1>
           <p className="muted">{c.email}{c.phone ? ` · ${c.phone}` : ''}{c.whatsapp ? ` · WhatsApp ${c.whatsapp}` : ''}</p>
           <p className="muted">পেজ: {(pages || []).map((p) => p.name).join(', ') || 'নেই'}</p>
-          <Link className="btn sm" href={`/admin/orders/new?customer=${c.id}`}>+ এই গ্রাহকের জন্য অর্ডার</Link>
+          <Link className="btn sm" href={`/admin/orders/new?customer=${c.id}`}>+ এই গ্রাহকের জন্য অর্ডার</Link>{' '}
+          <WaButton number={c.whatsapp || c.phone} text={`আসসালামু আলাইকুম ${c.full_name || ''}`} />
         </div>
         <div className="grid">
           <div className="stat"><span className="muted">বকেয়া</span><b>৳{bnNum(sum?.due)}</b></div>

@@ -15,6 +15,7 @@ export default async function Dashboard() {
     supabase.from('orders').select('*', { count: 'exact', head: true }).in('status', ['running']),
     supabase.rpc('customer_summary').single(),
   ]);
+  const { data: notices } = await supabase.from('notices').select('*').eq('active', true).order('created_at', { ascending: false }).limit(3);
   const due = Number(open?.due || 0); const wallet = Number(open?.wallet || 0);
   return (
     <>
@@ -24,6 +25,7 @@ export default async function Dashboard() {
           <h1>আসসালামু আলাইকুম, {profile.full_name || 'গ্রাহক'} <StatusBadge status={profile.status} /></h1>
           <p className="muted">আপনার অর্ডার, পেমেন্ট আর হিসাব এখান থেকে দেখতে পারবেন।</p>
         </div>
+        {(notices || []).map((n) => <div key={n.id} className="card notice"><b>📢 {n.title}</b><p style={{ whiteSpace: 'pre-line', margin: '6px 0 0' }}>{n.body}</p></div>)}
         <div className="grid">
           <div className="stat"><span className="muted">চলমান অর্ডার</span><b>{(running || 0).toLocaleString('bn-BD')}</b></div>
           <div className="stat"><span className="muted">মোট বকেয়া</span><b>৳{due.toLocaleString('bn-BD')}</b></div>

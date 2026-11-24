@@ -111,3 +111,9 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--brand); bor
 .timeline li::before { content: ''; position: absolute; left: -6px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--brand); }
 .copy { display: flex; gap: 6px; } .copy input { flex: 1; }
 table.t { width: 100%; border-collapse: collapse; } table.t td, table.t th { padding: 8px; border-bottom: 1px solid var(--line); text-align: left; }
+.dot { display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 2px; border-radius: 999px; background: #ef4444; color: #fff; font-size: .72rem; font-weight: 800; line-height: 18px; text-align: center; vertical-align: top; }
+.notice { border-left: 4px solid var(--brand); }
+.bubble { padding: 10px 12px; border-radius: 12px; max-width: 85%; white-space: pre-line; }
+.bubble.me { background: var(--brand); color: #fff; margin-left: auto; }
+.bubble.them { background: var(--bg); border: 1px solid var(--line); }
+@media print { .topbar, .noprint { display: none !important; } body { background: #fff; color: #000; } .card, .stat { border-color: #ccc; } }

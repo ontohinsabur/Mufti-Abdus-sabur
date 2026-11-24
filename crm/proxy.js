@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { SUPABASE_URL, SUPABASE_KEY } from '@/lib/config';
 
-const PUBLIC = ['/login', '/register', '/auth', '/manifest.webmanifest', '/icon'];
+const PUBLIC = ['/login', '/register', '/auth', '/manifest.webmanifest', '/icon', '/sw.js'];
 
 export async function proxy(request) {
   let response = NextResponse.next({ request });
