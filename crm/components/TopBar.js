@@ -3,8 +3,8 @@ import Link from 'next/link';
 export default function TopBar({ profile, active }) {
   const admin = profile?.role === 'admin';
   const links = admin
-    ? [['/admin', 'ড্যাশবোর্ড'], ['/admin/customers', 'গ্রাহক'], ['/profile', 'প্রোফাইল']]
-    : [['/dashboard', 'ড্যাশবোর্ড'], ['/profile', 'প্রোফাইল']];
+    ? [['/admin', 'ড্যাশবোর্ড'], ['/admin/orders', 'অর্ডার'], ['/admin/customers', 'গ্রাহক'], ['/admin/services', 'সেবা ও রেট']]
+    : [['/dashboard', 'ড্যাশবোর্ড'], ['/orders', 'অর্ডার'], ['/profile', 'প্রোফাইল']];
   return (
     <header className="topbar">
       <Link href="/" className="brand"><span className="brand-mark">M</span><span>Mufti Abdus Sabur</span></Link>
