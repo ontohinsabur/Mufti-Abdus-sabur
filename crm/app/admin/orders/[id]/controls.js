@@ -2,6 +2,7 @@
 import { useActionState } from 'react';
 import { changeStatus, setPrice, saveNote, splitOrder } from '../actions';
 import { STATUS, usd } from '@/lib/format';
+import { SettleForm } from '@/components/AdminMoney';
 
 const Msg = ({ s }) => (s?.err ? <div className="alert err">{s.err}</div> : s?.ok ? <div className="alert ok">{s.ok}</div> : null);
 const NEXT = {
@@ -39,6 +40,8 @@ export default function Controls({ o }) {
           <button className="btn block" disabled={b4}>নতুন অর্ডার তৈরি করুন</button>
         </form>
       )}
+
+      {o.pricing_type === 'per_usd' && ['running', 'off', 'completed'].includes(o.status) && o.spent_usd == null && !o.split_child && <SettleForm o={o} />}
 
       <form action={a2} className="card">
         <h2>{o.quote_status === 'pending' ? 'দাম (কোটেশন) ঠিক করুন' : 'মোট দাম বদলান'}</h2><Msg s={s2} />

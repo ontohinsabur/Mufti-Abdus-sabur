@@ -24,6 +24,11 @@ export async function placeOrder(_, form) {
     p_budget_usd: budget, p_duration: days,
     p_note: form.get('note')?.toString() || null,
     p_customer: customer,
+    p_pay_mode: form.get('pay_mode')?.toString() || (admin ? 'none' : 'now'),
+    p_use_wallet: form.get('use_wallet') === 'on',
+    p_method: form.get('method')?.toString() || null,
+    p_sender: form.get('sender')?.toString() || null,
+    p_trx: form.get('trx')?.toString() || null,
   });
   if (error) return { err: error.message.replace(/^.*?ERROR:\s*/, '') };
   // remember the access confirmation for this page (valid for 3 days)

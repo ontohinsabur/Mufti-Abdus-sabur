@@ -2,11 +2,12 @@
 import { useActionState, useEffect, useMemo, useRef, useState } from 'react';
 import { placeOrder } from '@/app/orders/actions';
 import { bnNum, usd } from '@/lib/format';
+import PayMethod from '@/components/PayMethod';
 
 const NEW = '__new__';
 const FRESH_MS = 3 * 86400000;
 
-export default function OrderForm({ services, pages, rates, access, initial = {}, admin = false, customers = [], customerId }) {
+export default function OrderForm({ services, pages, rates, access, pay, summary, summaries = {}, initial = {}, admin = false, customers = [], customerId }) {
   const [state, act, busy] = useActionState(placeOrder, null);
   const topRef = useRef(null);
   const [cust, setCust] = useState(initial.customer_id || customerId || '');
@@ -20,6 +21,8 @@ export default function OrderForm({ services, pages, rates, access, initial = {}
   const [accessYes, setAccessYes] = useState(null);
   const [preview, setPreview] = useState(null);
   const [copied, setCopied] = useState('');
+  const [mode, setMode] = useState(admin ? 'none' : 'now');
+  const [useWallet, setUseWallet] = useState(false);
 
   const svc = services.find((s) => s.id === svcId);
   const isAd = svc?.pricing_type === 'per_usd';
@@ -142,6 +145,44 @@ export default function OrderForm({ services, pages, rates, access, initial = {}
           ? <span>এই সেবার দাম আলোচনা করে ঠিক হবে। অর্ডার দিলে আমরা যোগাযোগ করব।</span>
           : <>মোট: <b>৳{bnNum(total)}</b>{isAd && <span className="muted"> ({usd(budget || 0)} × ৳{bnNum(rate)})</span>}</>}
       </div>
+
+      {(() => {
+        const sm = admin ? summaries[cust] : summary;
+        const priced = svc?.pricing_type !== 'quote' && rate;
+        if (!priced) return <input type="hidden" name="pay_mode" value="none" />;
+        const wallet = Number(sm?.wallet || 0);
+        const fromWallet = useWallet ? Math.min(wallet, total || 0) : 0;
+        const rest = Math.max(0, (total || 0) - fromWallet);
+        return (
+          <div style={{ marginTop: 14 }}>
+            <h2 style={{ marginBottom: 4 }}>পেমেন্ট</h2>
+            {wallet > 0 && (
+              <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontWeight: 400 }}>
+                <input type="checkbox" name="use_wallet" checked={useWallet} onChange={(e) => setUseWallet(e.target.checked)} style={{ width: 'auto' }} />
+                ওয়ালেট ব্যালেন্স (৳{bnNum(wallet)}) থেকে কাটুন
+              </label>
+            )}
+            {rest > 0 && (<>
+              <div className="tabs" style={{ marginTop: 8 }}>
+                {admin && <a href="#" className={mode === 'none' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setMode('none'); }}>পরে (অপরিশোধিত)</a>}
+                <a href="#" className={mode === 'now' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setMode('now'); }}>{admin ? 'পেমেন্ট পেয়েছি' : 'এখন পরিশোধ'}</a>
+                {sm?.pay_later_enabled && <a href="#" className={mode === 'later' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setMode('later'); }}>Pay Later (বাকি)</a>}
+              </div>
+              <input type="hidden" name="pay_mode" value={mode} />
+              {mode === 'now' && (<>
+                {!admin && <p className="muted">পুরো ৳{bnNum(rest)} পরিশোধ করুন। আংশিক পেমেন্ট নেওয়া হয় না।</p>}
+                <PayMethod pay={pay} admin={admin} />
+              </>)}
+              {mode === 'later' && (
+                <div className="price-box">বাকির লিমিট ৳{bnNum(sm.pay_later_limit)} · বর্তমান বাকি ৳{bnNum(sm.due)} · আরও নেওয়া যাবে <b style={{ fontSize: '1rem' }}>৳{bnNum(sm.available_credit)}</b>
+                  {rest > Number(sm.available_credit) && <div className="alert err" style={{ marginTop: 8 }}>{(sm.name || 'আপনার')} বাকির লিমিট নেই, আগে পেমেন্ট করেন।</div>}
+                </div>
+              )}
+            </>)}
+            {rest <= 0 && <><input type="hidden" name="pay_mode" value="now" /><p className="muted">পুরো দাম ওয়ালেট থেকে কাটা হবে।</p></>}
+          </div>
+        );
+      })()}
 
       <button className="btn block" disabled={busy || (needAccess && accessYes !== true)}>
         {busy ? 'অর্ডার হচ্ছে…' : needAccess && accessYes !== true ? 'আগে এক্সেস নিশ্চিত করুন' : 'অর্ডার দিন'}

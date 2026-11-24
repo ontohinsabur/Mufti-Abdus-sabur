@@ -21,7 +21,9 @@ export default async function AdminOrder({ params, searchParams }) {
         {o.split_child && <p className="muted">এই অর্ডারের বাকি অংশ নতুন অর্ডারে গেছে। <Link href={`/admin/orders/${o.split_child}`}>নতুন অর্ডার দেখুন</Link></p>}
         <OrderDetail o={o} events={events} admin />
         <Controls o={o} />
-        <Link className="btn ghost" href={`/admin/orders/new?from=${o.id}`}>🔃 আবার অর্ডার</Link>
+        <Link className="btn ghost" href={`/admin/orders/new?from=${o.id}`}>🔃 আবার অর্ডার</Link>{' '}
+        {o.total_bdt != null && <a className="btn ghost" href={`/invoice/${o.id}`}>🧾 ইনভয়েস</a>}{' '}
+        {o.payment_status !== 'paid' && o.total_bdt != null && <Link className="btn ghost" href={`/admin/payments?tab=record&customer=${o.customer_id}`}>💳 পেমেন্ট রেকর্ড</Link>}
       </main>
     </>
   );
