@@ -32,7 +32,7 @@ export default async function AdminHome() {
   const { day, month } = dhakaStarts();
   const head = { count: 'exact', head: true };
   const P = 'profiles!orders_customer_id_fkey(full_name, email, phone, whatsapp, status, role)';
-  const [today, waiting, verify, pendingCust, wreq, open, monthOrders, monthPays, recent, ending, tickets] = await Promise.all([
+  const [today, waiting, verify, pendingCust, wreq, open, monthOrders, monthPays, recent, ending, tickets, running, todayPays, custs] = await Promise.all([
     supabase.from('orders').select('*', head).gte('created_at', day),
     supabase.from('orders').select('*', head).eq('status', 'pending'),
     supabase.from('payments').select('*', head).eq('status', 'submitted'),
@@ -44,7 +44,12 @@ export default async function AdminHome() {
     supabase.from('orders').select(`*, ${P}`).order('created_at', { ascending: false }).limit(6),
     supabase.from('orders').select(`id, order_no, service_name, page_name, run_end, paused_at, ${P}`).eq('status', 'running').not('run_end', 'is', null).order('run_end').limit(5),
     supabase.from('support_tickets').select('id, subject, status, last_message_at, profiles(full_name, email, status, role), support_messages(body, sender, created_at)').order('last_message_at', { ascending: false }).limit(5),
+    supabase.from('orders').select('run_end').eq('status', 'running'),
+    supabase.from('payments').select('amount').eq('status', 'verified').gte('created_at', day),
+    supabase.from('profiles').select('*', head).eq('role', 'customer').eq('status', 'approved'),
   ]);
+  const soon = (running.data || []).filter((o) => o.run_end && new Date(o.run_end) - Date.now() < 864e5).length;
+  const gotToday = (todayPays.data || []).reduce((s, p) => s + Number(p.amount || 0), 0);
   const due = (open.data || []).reduce((s, o) => s + Math.max(0, Number(o.total_bdt || 0) - Number(o.paid_amount || 0)), 0);
   const sales = (monthOrders.data || []).reduce((s, o) => s + Number(o.total_bdt || 0), 0);
   const got = (monthPays.data || []).reduce((s, p) => s + Number(p.amount || 0), 0);
@@ -56,8 +61,16 @@ export default async function AdminHome() {
       <TopBar profile={profile} active="/admin" />
       <main className="wrap">
         <section className="hero">
-          <h1>আসসালামু আলাইকুম, {profile.full_name || 'অ্যাডমিন'}</h1>
-          <p>{date}</p>
+          <div className="hero-txt">
+            <h1>আসসালামু আলাইকুম, {profile.full_name || 'অ্যাডমিন'}</h1>
+            <p>{date}</p>
+          </div>
+          <div className="hero-chips">
+            <Link href="/admin/orders?status=running"><span>🟢 এড চলছে</span><b>{n((running.data || []).length)}</b></Link>
+            <Link href="/admin/orders?status=running" className={soon ? 'warn' : ''}><span>⏳ ২৪ ঘণ্টায় শেষ</span><b>{n(soon)}</b></Link>
+            <Link href="/admin/payments?tab=verified"><span>💰 আজ আদায়</span><b>{tk(gotToday)}</b></Link>
+            <Link href="/admin/customers"><span>👥 কাস্টমার</span><b>{n(custs.count)}</b></Link>
+          </div>
         </section>
 
         {pendingCust.count > 0 && <div className="alert warn">{n(pendingCust.count)} জন নতুন গ্রাহক অনুমোদনের অপেক্ষায়। <Link href="/admin/customers?status=pending">এখনই দেখুন →</Link></div>}
