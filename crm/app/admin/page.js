@@ -32,13 +32,13 @@ export default async function AdminHome() {
   const { day, month } = dhakaStarts();
   const head = { count: 'exact', head: true };
   const P = 'profiles!orders_customer_id_fkey(full_name, email, phone, whatsapp, status, role)';
-  const [today, waiting, verify, pendingCust, wreq, open, monthOrders, monthPays, recent, ending, tickets, running, todayPays, custs] = await Promise.all([
+  const [today, waiting, verify, pendingCust, wreq, open, monthOrders, monthPays, recent, ending, tickets, running, todayPays, custs, openTk] = await Promise.all([
     supabase.from('orders').select('*', head).gte('created_at', day),
     supabase.from('orders').select('*', head).eq('status', 'pending'),
     supabase.from('payments').select('*', head).eq('status', 'submitted'),
     supabase.from('profiles').select('*', head).eq('role', 'customer').eq('status', 'pending'),
     supabase.from('wallet_requests').select('*', head).eq('status', 'pending'),
-    supabase.from('orders').select('total_bdt, paid_amount').not('status', 'in', '(off,cancelled)'),
+    supabase.from('orders').select('total_bdt, paid_amount, customer_id').not('status', 'in', '(off,cancelled)'),
     supabase.from('orders').select('total_bdt').gte('created_at', month).neq('status', 'cancelled'),
     supabase.from('payments').select('amount').eq('status', 'verified').gte('created_at', month),
     supabase.from('orders').select(`*, ${P}`).order('created_at', { ascending: false }).limit(6),
@@ -47,7 +47,9 @@ export default async function AdminHome() {
     supabase.from('orders').select('run_end').eq('status', 'running'),
     supabase.from('payments').select('amount').eq('status', 'verified').gte('created_at', day),
     supabase.from('profiles').select('*', head).eq('role', 'customer').eq('status', 'approved'),
+    supabase.from('support_tickets').select('*', head).eq('status', 'open'),
   ]);
+  const dueCust = new Set((open.data || []).filter((o) => Number(o.total_bdt || 0) - Number(o.paid_amount || 0) > 0.009).map((o) => o.customer_id)).size;
   const soon = (running.data || []).filter((o) => o.run_end && new Date(o.run_end) - Date.now() < 864e5).length;
   const gotToday = (todayPays.data || []).reduce((s, p) => s + Number(p.amount || 0), 0);
   const due = (open.data || []).reduce((s, o) => s + Math.max(0, Number(o.total_bdt || 0) - Number(o.paid_amount || 0)), 0);
@@ -70,6 +72,8 @@ export default async function AdminHome() {
             <Link href="/admin/orders?status=running" className={soon ? 'warn' : ''}><span>⏳ ২৪ ঘণ্টায় শেষ</span><b>{n(soon)}</b></Link>
             <Link href="/admin/payments?tab=verified"><span>💰 আজ আদায়</span><b>{tk(gotToday)}</b></Link>
             <Link href="/admin/customers"><span>👥 কাস্টমার</span><b>{n(custs.count)}</b></Link>
+            <Link href="/admin/payments" className={`pc-only ${dueCust ? 'warn' : ''}`}><span>🧾 বকেয়া কাস্টমার</span><b>{n(dueCust)}</b></Link>
+            <Link href="/admin/support" className="pc-only"><span>💬 খোলা সাপোর্ট</span><b>{n(openTk.count)}</b></Link>
           </div>
         </section>
 
