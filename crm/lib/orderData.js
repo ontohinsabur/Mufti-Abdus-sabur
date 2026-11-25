@@ -27,5 +27,10 @@ export async function loadOrderFormData(supabase, { admin, userId }) {
     (r || []).forEach((x) => { rates[x.service_id] = x; });
     summary = (await supabase.rpc('customer_summary').single()).data;
   }
-  return { services: services || [], pages, rates, customers, access: setting?.value || {}, pay: paySet?.value || {}, summary, summaries };
+  // last few post links per customer ("আগের পোস্ট লিংক")
+  const pq = supabase.from('orders').select('customer_id, post_url').not('post_url', 'is', null).order('created_at', { ascending: false }).limit(admin ? 600 : 30);
+  const { data: pr } = admin ? await pq : await pq.eq('customer_id', userId);
+  const posts = {};
+  (pr || []).forEach((x) => { const k = admin ? x.customer_id : 'me'; const a = (posts[k] ||= []); if (a.length < 3 && !a.includes(x.post_url)) a.push(x.post_url); });
+  return { posts, services: services || [], pages, rates, customers, access: setting?.value || {}, pay: paySet?.value || {}, summary, summaries };
 }
