@@ -3,6 +3,9 @@ import { useActionState, useEffect, useMemo, useRef, useState } from 'react';
 import { placeOrder } from '@/app/orders/actions';
 import { bnNum, usd } from '@/lib/format';
 import PayMethod from '@/components/PayMethod';
+import { CustomerPicker, ServicePicker } from '@/components/OrderPickers';
+
+const money = (x) => '৳' + Number(x || 0).toLocaleString('en-US', { maximumFractionDigits: 2 });
 
 const NEW = '__new__';
 const FRESH_MS = 3 * 86400000;
@@ -44,6 +47,12 @@ export default function OrderForm({ services, pages, rates, access, pay, summary
     if (svc.pricing_type === 'fixed_bdt') return Number(r?.fixed_price_bdt || svc.fixed_price_bdt || 0);
     return null;
   }, [svc, rates, cust, admin]);
+  const priceOf = (sv) => {
+    const r = rates?.[(admin ? cust + ':' : '') + sv.id];
+    if (sv.pricing_type === 'per_usd') { const v = Number(r?.rate_bdt_per_usd || sv.rate_bdt_per_usd || 0); return v ? `৳${bnNum(v)} / ডলার` : ''; }
+    if (sv.pricing_type === 'fixed_bdt') { const v = Number(r?.fixed_price_bdt || sv.fixed_price_bdt || 0); return v ? `৳${bnNum(v)}` : ''; }
+    return 'কোটেশন';
+  };
   const total = isAd ? (Number(budget) || 0) * (rate || 0) : rate;
   const minErr = isAd && Number(days) > 0 && Number(budget) > 0 && Number(budget) < Number(days);
 
@@ -68,45 +77,68 @@ export default function OrderForm({ services, pages, rates, access, pay, summary
   const copy = async (txt, k) => { try { await navigator.clipboard.writeText(txt); setCopied(k); setTimeout(() => setCopied(''), 1500); } catch {} };
 
   return (
-    <form action={act} className="card" ref={topRef}>
+    <form action={act} className="of" ref={topRef}>
       {state?.err && <div className="alert err">{state.err}</div>}
 
-      {admin && (<>
-        <label>গ্রাহক</label>
-        <select name="customer_id" value={cust} onChange={(e) => setCust(e.target.value)} required>
-          <option value="">— গ্রাহক নির্বাচন করুন —</option>
-          {customers.map((c) => <option key={c.id} value={c.id}>{c.full_name || c.email}{c.phone ? ` (${c.phone})` : ''}</option>)}
-        </select>
-      </>)}
+      {admin && (
+        <section className="of-sec">
+          <h3><span>০১</span>কাস্টমার</h3>
+          <CustomerPicker customers={customers} value={cust} onChange={setCust} summary={summaries[cust]} />
+          <input type="hidden" name="customer_id" value={cust} />
+        </section>
+      )}
 
-      <label>সেবা</label>
-      <select name="service_id" value={svcId} onChange={(e) => setSvcId(e.target.value)}>
-        {services.map((s) => <option key={s.id} value={s.id}>{s.name}{s.description ? ` — ${s.description}` : ''}</option>)}
-      </select>
-
+      <section className="of-sec">
+        <h3><span>{admin ? '০২' : '০১'}</span>অর্ডারের তথ্য</h3>
+        <div className="of-grid">
+        <div className="of-field full">
+          <span className="of-lbl">সার্ভিস বেছে নিন *</span>
+          <ServicePicker services={services} value={svcId} onChange={setSvcId} priceOf={priceOf} />
+          <input type="hidden" name="service_id" value={svcId} />
+          {admin && <small className="of-help">কাস্টমারের নিজস্ব রেট থাকলে সেটাই আগে ধরা হয়।</small>}
+        </div>
       {isAd && (<>
-        <label>ফেসবুক পোস্টের লিংক</label>
-        <input name="post_url" value={post} onChange={(e) => setPost(e.target.value)} placeholder="https://www.facebook.com/..." inputMode="url" />
-        {preview && (
-          <div className="preview">
-            {preview.image && <img src={preview.image} alt="" referrerPolicy="no-referrer" />}
-            <div><b>{preview.title || 'পোস্ট'}</b><div className="muted">{(preview.description || '').slice(0, 140)}</div></div>
-          </div>
-        )}
+        <div className="of-field">
+          <span className="of-lbl">কত ডলার খরচ করবে? (বাজেট) *</span>
+          <input name="budget_usd" value={budget} onChange={(e) => setBudget(e.target.value)} inputMode="decimal" placeholder="যেমন 10" />
+        </div>
+        <div className="of-field">
+          <span className="of-lbl">কতদিন এড চলবে? *</span>
+          <input name="duration_days" value={days} onChange={(e) => setDays(e.target.value)} inputMode="numeric" placeholder="দিন" />
+        </div>
+        {minErr && <div className="alert warn full">Meta-র নিয়মে প্রতিদিন কমপক্ষে ১ ডলার লাগে। {bnNum(days)} দিনের জন্য কমপক্ষে {usd(days)} দিন।</div>}
 
-        <label>ফেসবুক পেজ</label>
-        <select value={pageId} onChange={(e) => setPageId(e.target.value)}>
-          {custPages.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-          <option value={NEW}>+ নতুন পেজ</option>
-        </select>
-        <input type="hidden" name="page_id" value={pageId === NEW ? '' : pageId} />
-        {pageId === NEW && <input name="page_name" value={newPage} onChange={(e) => setNewPage(e.target.value)} placeholder="নতুন পেজের নাম (পরের বার তালিকায় থাকবে)" style={{ marginTop: 8 }} />}
+        <div className="of-field">
+          <span className="of-lbl">ফেসবুক পোস্টের লিংক *</span>
+          <input name="post_url" value={post} onChange={(e) => setPost(e.target.value)} placeholder="https://www.facebook.com/..." inputMode="url" />
+          <small className="of-help">Facebook পোস্ট, রিল বা ভিডিওর লিংক দিন।</small>
+        </div>
+        <div className="of-field">
+          <span className="of-lbl">লিংক প্রিভিউ</span>
+          {preview ? (
+            <div className="of-preview">
+              {preview.image && <img src={preview.image} alt="" referrerPolicy="no-referrer" />}
+              <div><b>{preview.title || 'পোস্ট'}</b><small>{(preview.description || '').slice(0, 120)}</small>
+                <a href={post} target="_blank" rel="noopener noreferrer">পোস্ট খুলুন ↗</a></div>
+            </div>
+          ) : <div className="of-preview empty">লিংক দিলে এখানে প্রিভিউ দেখা যাবে।</div>}
+        </div>
+
+        <div className="of-field full">
+          <span className="of-lbl">ফেসবুক পেজ</span>
+          <div className="of-pages">
+            {custPages.map((p) => <button type="button" key={p.id} className={pageId === p.id ? 'on' : ''} onClick={() => setPageId(p.id)}><i>f</i>{p.name}</button>)}
+            <button type="button" className={`add ${pageId === NEW ? 'on' : ''}`} onClick={() => setPageId(NEW)}>+ নতুন পেজ</button>
+          </div>
+          <input type="hidden" name="page_id" value={pageId === NEW ? '' : pageId} />
+          {pageId === NEW && <input name="page_name" value={newPage} onChange={(e) => setNewPage(e.target.value)} placeholder="ফেসবুক পেজের নাম লিখুন (পরের বার তালিকায় থাকবে)" style={{ marginTop: 8 }} />}
+        </div>
 
         {!admin && pageId !== NEW && accessFresh && (
-          <div className="alert ok" style={{ marginTop: 10 }}>✔ এই পেজের এক্সেস দেওয়া আছে বলে নিশ্চিত করেছেন।</div>
+          <div className="alert ok full" style={{ marginTop: 4 }}>✔ এই পেজের এক্সেস দেওয়া আছে বলে নিশ্চিত করেছেন।</div>
         )}
         {needAccess && (
-          <div className="price-box">
+          <div className="price-box full">
             <b style={{ fontSize: '1rem' }}>এই পেজে আমাদের এক্সেস দিয়েছেন?</b>
             <div className="choice">
               <button type="button" className={`btn ok ${accessYes === true ? 'on' : ''}`} onClick={() => setAccessYes(true)}>হ্যাঁ</button>
@@ -129,33 +161,31 @@ export default function OrderForm({ services, pages, rates, access, pay, summary
             <input type="hidden" name="access_yes" value={accessYes ? '1' : ''} />
           </div>
         )}
-
-        <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-          <div><label>বাজেট (ডলার)</label><input name="budget_usd" value={budget} onChange={(e) => setBudget(e.target.value)} inputMode="decimal" placeholder="যেমন 10" /></div>
-          <div><label>কতদিন চলবে</label><input name="duration_days" value={days} onChange={(e) => setDays(e.target.value)} inputMode="numeric" placeholder="দিন" /></div>
-        </div>
-        {minErr && <div className="alert warn" style={{ marginTop: 8 }}>Meta-র নিয়মে প্রতিদিন কমপক্ষে ১ ডলার লাগে। {bnNum(days)} দিনের জন্য কমপক্ষে {usd(days)} দিন।</div>}
       </>)}
 
-      <label>নোট <span className="muted">(ঐচ্ছিক)</span></label>
-      <textarea name="note" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder="টার্গেট এলাকা, বয়স বা অন্য কিছু জানাতে চাইলে লিখুন" />
-
-      <div className="price-box">
-        {svc?.pricing_type === 'quote' || !rate
-          ? <span>এই সেবার দাম আলোচনা করে ঠিক হবে। অর্ডার দিলে আমরা যোগাযোগ করব।</span>
-          : <>মোট: <b>৳{bnNum(total)}</b>{isAd && <span className="muted"> ({usd(budget || 0)} × ৳{bnNum(rate)})</span>}</>}
-      </div>
+        <div className="of-field full">
+          <span className="of-lbl">অর্ডার নোট <em>(ঐচ্ছিক)</em></span>
+          <textarea name="note" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder="কাস্টম অডিয়েন্স / টার্গেট এলাকা / বয়স / অন্যান্য তথ্য" />
+        </div>
+        </div>
+      </section>
 
       {(() => {
         const sm = admin ? summaries[cust] : summary;
         const priced = svc?.pricing_type !== 'quote' && rate;
-        if (!priced) return <input type="hidden" name="pay_mode" value="none" />;
+        if (!priced) return (
+          <section className="of-sec">
+            <input type="hidden" name="pay_mode" value="none" />
+            <div className="price-box" style={{ marginTop: 0 }}>এই সেবার দাম আলোচনা করে ঠিক হবে। {admin ? 'অর্ডারটি কোটেশন হিসেবে তৈরি হবে।' : 'অর্ডার দিলে আমরা যোগাযোগ করব।'}</div>
+          </section>
+        );
         const wallet = Number(sm?.wallet || 0);
         const fromWallet = useWallet ? Math.min(wallet, total || 0) : 0;
         const rest = Math.max(0, (total || 0) - fromWallet);
+        const paidNow = fromWallet + (mode === 'now' ? rest : 0);
         return (
-          <div style={{ marginTop: 14 }}>
-            <h2 style={{ marginBottom: 4 }}>পেমেন্ট</h2>
+          <section className="of-sec">
+            <h3><span>{admin ? '০৩' : '০২'}</span>পেমেন্টের তথ্য</h3>
             {wallet > 0 && (
               <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontWeight: 400 }}>
                 <input type="checkbox" name="use_wallet" checked={useWallet} onChange={(e) => setUseWallet(e.target.checked)} style={{ width: 'auto' }} />
@@ -163,7 +193,8 @@ export default function OrderForm({ services, pages, rates, access, pay, summary
               </label>
             )}
             {rest > 0 && (<>
-              <div className="tabs" style={{ marginTop: 8 }}>
+              <span className="of-lbl">পেমেন্ট কীভাবে?</span>
+              <div className="of-chips">
                 {admin && <a href="#" className={mode === 'none' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setMode('none'); }}>পরে (অপরিশোধিত)</a>}
                 <a href="#" className={mode === 'now' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setMode('now'); }}>{admin ? 'পেমেন্ট পেয়েছি' : 'এখন পরিশোধ'}</a>
                 {sm?.pay_later_enabled && <a href="#" className={mode === 'later' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setMode('later'); }}>Pay Later (বাকি)</a>}
@@ -180,13 +211,21 @@ export default function OrderForm({ services, pages, rates, access, pay, summary
               )}
             </>)}
             {rest <= 0 && <><input type="hidden" name="pay_mode" value="now" /><p className="muted">পুরো দাম ওয়ালেট থেকে কাটা হবে।</p></>}
-          </div>
+            <div className="of-sum">
+              <div><small>অর্ডারের মোট</small><b>{money(total)}</b>{isAd && <em>{usd(budget || 0)} × ৳{bnNum(rate)}</em>}</div>
+              <div><small>পরিশোধ</small><b className="ok">{money(paidNow)}</b></div>
+              <div><small>বাকি</small><b className={total - paidNow > 0.009 ? 'due' : ''}>{money(Math.max(0, (total || 0) - paidNow))}</b></div>
+            </div>
+          </section>
         );
       })()}
 
-      <button className="btn block" disabled={busy || (needAccess && accessYes !== true)}>
-        {busy ? 'অর্ডার হচ্ছে…' : needAccess && accessYes !== true ? 'আগে এক্সেস নিশ্চিত করুন' : 'অর্ডার দিন'}
-      </button>
+      <div className="of-submit">
+        <button className="btn-new" disabled={busy || (needAccess && accessYes !== true) || (admin && !cust)}>
+          {busy ? 'অর্ডার হচ্ছে…' : needAccess && accessYes !== true ? 'আগে এক্সেস নিশ্চিত করুন' : admin && !cust ? 'আগে কাস্টমার বেছে নিন' : admin ? 'অর্ডার তৈরি করুন' : 'অর্ডার দিন'}
+        </button>
+        <a href={admin ? '/admin/orders' : '/orders'} className="oc-btn">বাতিল</a>
+      </div>
     </form>
   );
 }

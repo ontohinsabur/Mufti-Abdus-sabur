@@ -12,7 +12,7 @@ export async function loadOrderFormData(supabase, { admin, userId }) {
     const [{ data: p }, { data: r }, { data: c }] = await Promise.all([
       supabase.from('facebook_pages').select('*').eq('archived', false).order('name'),
       supabase.from('customer_rates').select('*').eq('active', true),
-      supabase.from('profiles').select('id, full_name, email, phone').eq('role', 'customer').eq('status', 'approved').order('full_name'),
+      supabase.from('profiles').select('id, full_name, email, phone, status, role').eq('role', 'customer').eq('status', 'approved').order('full_name'),
     ]);
     pages = p || []; customers = c || [];
     const sums = await Promise.all(customers.map((x) => supabase.rpc('customer_summary', { p_customer: x.id }).single()));

@@ -22,7 +22,7 @@ export default function PayMethod({ pay, admin }) {
   return (
     <div>
       <label>পেমেন্ট পদ্ধতি</label>
-      <div className="tabs">{list.map((k) => <a key={k} href="#" className={m === k ? 'active' : ''} onClick={(e) => { e.preventDefault(); setM(k); }}>{METHOD[k]}</a>)}</div>
+      <div className="of-chips">{list.map((k) => <a key={k} href="#" className={m === k ? 'active' : ''} onClick={(e) => { e.preventDefault(); setM(k); }}>{METHOD[k]}</a>)}</div>
       <input type="hidden" name="method" value={m} />
       {!admin && num && (
         <div className="price-box" style={{ marginTop: 0 }}>
