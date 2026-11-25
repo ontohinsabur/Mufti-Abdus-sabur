@@ -58,11 +58,11 @@ export function PayLaterForm({ c }) {
   );
 }
 
-export function SettleForm({ o }) {
+export function SettleForm({ o, bare }) {
   const [s, act, busy] = useActionState(settleUnused, null);
   return (
-    <form action={act} className="card">
-      <h2>অব্যবহৃত বাজেটের হিসাব</h2><Msg s={s} />
+    <form action={act} className={bare ? '' : 'card'}>
+      {!bare && <h2>অব্যবহৃত বাজেটের হিসাব</h2>}<Msg s={s} />
       <p className="muted">এড আগে বন্ধ হলে যতটুকু খরচ হয়েছে শুধু ততটুকু বিল হবে। গ্রাহক বেশি দিয়ে থাকলে বাকি টাকা ওয়ালেটে জমা হবে অথবা ফেরত দেওয়া হিসেবে লেখা হবে। অর্ডারটি সম্পন্ন হয়ে যাবে।</p>
       <input type="hidden" name="id" value={o.id} />
       <label>কত ডলার খরচ হয়েছে? (মোট বাজেট {usd(o.budget_usd)})</label><input name="spent" inputMode="decimal" />

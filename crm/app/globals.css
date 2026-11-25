@@ -451,3 +451,61 @@ body:has(.sidebar) .wrap { max-width: 1200px; }
 .oc-steps i.run { position: relative; overflow: hidden; }
 .oc-steps i.run u { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: linear-gradient(90deg, #2563eb, #60a5fa); transition: width 1s linear; }
 .oc.st-off .oc-steps i.run u { background: #94a3b8; }
+
+/* order detail (old CRM look) */
+.od { max-width: 1100px; }
+.od-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 4px 0 8px; }
+.od-back { display: inline-block; color: var(--muted); font-size: 1.05rem; margin: 6px 4px 14px; }
+.od-card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 22px 26px; margin-bottom: 18px; }
+.od-card h2 { font-size: 1.25rem; margin: 0 0 14px; }
+.od-help { color: var(--muted); font-size: .95rem; margin: 12px 0 0; }
+.od-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 18px; border-radius: 14px; cursor: pointer;
+  background: var(--bg); border: 1px solid var(--line); color: var(--text); font: inherit; font-weight: 700; white-space: nowrap; }
+.od-btn.on { border-color: #3b82f6; color: #60a5fa; }
+.od-btn.wa { background: #16a34a; border-color: #16a34a; color: #fff; }
+.od-btnrow { display: flex; gap: 10px; flex-wrap: wrap; }
+.od-sum { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
+.od-sum small { color: var(--muted); font-family: system-ui, sans-serif; }
+.od-sum h2 { font-size: 1.6rem; margin: 4px 0 8px; font-family: system-ui, 'SolaimanLipi', sans-serif; }
+.od-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.od-pills em { font-style: normal; font-weight: 700; font-size: .9rem; padding: 4px 12px; border-radius: 999px; background: rgba(59,130,246,.15); color: #60a5fa; }
+.od-pills em.s-pending { background: var(--warn-bg); color: var(--warn); } .od-pills em.s-completed { background: var(--ok-bg); color: var(--ok); }
+.od-pills em.s-cancelled { background: var(--bad-bg); color: var(--bad); } .od-pills em.s-off { background: rgba(148,163,184,.15); color: var(--muted); }
+.od-pills em.due { background: rgba(139,92,246,.18); color: #a78bfa; } .od-pills em.paid { background: var(--ok-bg); color: var(--ok); }
+.od-amt { text-align: right; } .od-amt b { display: block; font-size: 2rem; font-family: system-ui, sans-serif; } .od-amt small { color: #f87171; font-weight: 700; font-size: 1rem; }
+.od-send { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; background: rgba(37,99,235,.10); border-color: rgba(59,130,246,.35); }
+.od-send h2 { margin: 0; } .od-send p { margin: 2px 0 0; color: var(--muted); }
+.od-status { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.od-status form { display: contents; }
+.od-status button { padding: 16px 8px; border-radius: 14px; cursor: pointer; font: inherit; font-weight: 700; font-size: 1.05rem; background: var(--bg); border: 1px solid var(--line); color: var(--text); }
+.od-status button:hover:not(:disabled) { border-color: #3b82f6; }
+.od-status button.on { background: #2563eb; border-color: #2563eb; color: #fff; cursor: default; }
+.od-status button.on.completed { background: #16a34a; border-color: #16a34a; } .od-status button.on.cancelled { background: #dc2626; border-color: #dc2626; }
+.od-status button.on.off { background: #475569; border-color: #475569; } .od-status button.on.pending { background: #d97706; border-color: #d97706; }
+.od-status button:disabled:not(.on) { opacity: .6; }
+.od-run { margin-top: 16px; padding: 16px 20px; border-radius: 16px; background: rgba(37,99,235,.10); border: 1px solid rgba(59,130,246,.35); }
+.od-run b { display: block; font-size: 1.05rem; } .od-run b span { color: #60a5fa; font-family: system-ui, sans-serif; }
+.od-run small { display: block; color: var(--muted); margin-top: 4px; }
+.od-runbar { margin-top: 12px; } .od-runbar i.run { position: relative; display: block; height: 8px; border-radius: 6px; background: rgba(148,163,184,.25); overflow: hidden; }
+.od-runbar i.run u { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: linear-gradient(90deg, #2563eb, #60a5fa); }
+.od-kv { display: grid; grid-template-columns: auto 1fr; margin: 0; }
+.od-kv dt, .od-kv dd { padding: 12px 0; border-bottom: 1px dashed var(--line); margin: 0; }
+.od-kv dt { color: var(--muted); } .od-kv dd { text-align: right; font-weight: 700; word-break: break-word; }
+.od-links { display: flex; justify-content: flex-end; align-items: center; gap: 10px; } .od-links .od-btn { padding: 7px 14px; }
+.od-paystate { display: flex; align-items: center; gap: 8px; margin-top: 14px; flex-wrap: wrap; } .od-paystate > span { color: var(--muted); }
+.chip.dim { opacity: .5; }
+.od-edit { display: inline-flex; align-items: center; gap: 8px; background: none; border: 0; color: var(--muted); font: inherit; cursor: pointer; padding: 6px 2px 18px; }
+.od-grid1 { display: grid; gap: 0; }
+.pp { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.pp-box { display: block; width: min(100%, 630px); border-radius: 16px; overflow: hidden; background: var(--bg); border: 1px solid var(--line); color: var(--text); }
+.pp-box.empty { padding: 30px 20px; text-align: center; color: var(--muted); }
+.pp-img { position: relative; display: block; } .pp-img img { display: block; width: 100%; max-height: 460px; object-fit: cover; }
+.pp-img .oc-play { width: 60px; height: 60px; } .pp-img .oc-play::after { left: 24px; top: 18px; border-width: 12px 0 12px 18px; }
+.pp-t { display: block; padding: 14px 18px; } .pp-t small { color: #3b82f6; font-weight: 800; font-family: system-ui, sans-serif; }
+.pp-t b { display: block; font-size: 1.1rem; margin: 2px 0 4px; } .pp-t em { font-style: normal; color: var(--muted); font-size: .95rem; }
+.pp-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+@media (max-width: 760px) {
+  .od-card { padding: 16px; border-radius: 18px; }
+  .od-status { grid-template-columns: repeat(3, 1fr); }
+  .od-amt { text-align: left; }
+}
