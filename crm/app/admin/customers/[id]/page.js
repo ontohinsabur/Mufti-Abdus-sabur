@@ -11,6 +11,7 @@ import WalletView from '@/components/WalletView';
 import { PayLaterForm, AdjustForm } from '@/components/AdminMoney';
 import { buildLedger } from '@/lib/money';
 import { bnNum } from '@/lib/format';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 export default async function Customer({ params }) {
   const { supabase, profile } = await requireAdmin();
@@ -34,7 +35,7 @@ export default async function Customer({ params }) {
       <TopBar profile={profile} active="/admin/customers" />
       <main className="wrap narrow">
         <div className="card">
-          <h1>{c.full_name || '(নাম নেই)'} <StatusBadge status={c.status} /></h1>
+          <h1>{c.full_name || '(নাম নেই)'}<VerifiedBadge profile={c} size={20} /> <StatusBadge status={c.status} /></h1>
           <p className="muted">{c.email}{c.phone ? ` · ${c.phone}` : ''}{c.whatsapp ? ` · WhatsApp ${c.whatsapp}` : ''}</p>
           <p className="muted">পেজ: {(pages || []).map((p) => p.name).join(', ') || 'নেই'}</p>
           <Link className="btn sm" href={`/admin/orders/new?customer=${c.id}`}>+ এই গ্রাহকের জন্য অর্ডার</Link>{' '}

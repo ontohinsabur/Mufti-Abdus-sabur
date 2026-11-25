@@ -10,7 +10,7 @@ import { STATUS, bnNum } from '@/lib/format';
 export default async function AdminOrder({ params, searchParams }) {
   const { supabase, profile } = await requireAdmin();
   const { id } = await params; const sp = await searchParams;
-  const { data: o } = await supabase.from('orders').select('*, profiles!orders_customer_id_fkey(full_name, email, phone, whatsapp)').eq('id', id).maybeSingle();
+  const { data: o } = await supabase.from('orders').select('*, profiles!orders_customer_id_fkey(full_name, email, phone, whatsapp, status, role)').eq('id', id).maybeSingle();
   if (!o) notFound();
   const { data: events } = await supabase.from('order_events').select('*').eq('order_id', id).order('created_at');
   return (

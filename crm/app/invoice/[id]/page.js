@@ -3,6 +3,7 @@ import { getSession } from '@/lib/supabase/server';
 import PrintButton from '@/components/PrintButton';
 import { METHOD } from '@/components/PayMethod';
 import { bnNum, usd, PAY } from '@/lib/format';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 export const metadata = { title: 'ইনভয়েস | Mufti Abdus Sabur' };
 const d = (x) => (x ? new Date(x).toLocaleDateString('bn-BD', { timeZone: 'Asia/Dhaka', day: 'numeric', month: 'long', year: 'numeric' }) : '');
@@ -11,7 +12,7 @@ export default async function Invoice({ params }) {
   const { supabase, user } = await getSession();
   if (!user) redirect('/login');
   const { id } = await params;
-  const { data: o } = await supabase.from('orders').select('*, profiles!orders_customer_id_fkey(full_name, email, phone)').eq('id', id).maybeSingle();
+  const { data: o } = await supabase.from('orders').select('*, profiles!orders_customer_id_fkey(full_name, email, phone, status, role)').eq('id', id).maybeSingle();
   if (!o) notFound();
   const [{ data: biz }, { data: allocs }] = await Promise.all([
     supabase.from('settings').select('value').eq('key', 'business').maybeSingle(),
@@ -37,7 +38,7 @@ export default async function Invoice({ params }) {
           <div className="inv-meta"><h1>ইনভয়েস</h1><div><b>{o.invoice_no}</b></div><div>তারিখ: {d(o.created_at)}</div>
             <div style={{ marginTop: 6 }}><span className={`stamp ${o.payment_status}`}>{PAY[o.payment_status]}</span></div></div>
         </div>
-        <div style={{ marginTop: 14 }}><b>গ্রাহক:</b> {o.profiles?.full_name}<br />{o.profiles?.phone} {o.profiles?.email && `· ${o.profiles.email}`}</div>
+        <div style={{ marginTop: 14 }}><b>গ্রাহক:</b> {o.profiles?.full_name}<VerifiedBadge profile={o.profiles} /><br />{o.profiles?.phone} {o.profiles?.email && `· ${o.profiles.email}`}</div>
         <table>
           <thead><tr><th>বিবরণ</th><th>পরিমাণ</th><th>রেট</th><th>মোট</th></tr></thead>
           <tbody>

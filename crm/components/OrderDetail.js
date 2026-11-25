@@ -10,7 +10,7 @@ export default function OrderDetail({ o, events, admin }) {
         <h1>অর্ডার #{o.order_no} <OrderStatus status={o.status} /></h1>
         <dl className="kv">
           <dt>সেবা</dt><dd>{o.service_name}</dd>
-          {admin && o.profiles && <><dt>গ্রাহক</dt><dd>{o.profiles.full_name} · {o.profiles.email}{o.profiles.phone ? ` · ${o.profiles.phone}` : ''}</dd></>}
+          {admin && o.profiles && <><dt>গ্রাহক</dt><dd>{o.profiles.full_name}<VerifiedBadge profile={o.profiles} /> · {o.profiles.email}{o.profiles.phone ? ` · ${o.profiles.phone}` : ''}</dd></>}
           {o.page_name && <><dt>পেজ</dt><dd>{o.page_name}</dd></>}
           {o.post_url && <><dt>পোস্ট</dt><dd><a href={o.post_url} target="_blank" rel="noopener noreferrer">{o.post_url}</a></dd></>}
           {o.budget_usd && <><dt>বাজেট</dt><dd>{usd(o.budget_usd)} · {bnNum(o.duration_days)} দিন{o.spent_usd != null ? ` · খরচ হয়েছে ${usd(o.spent_usd)}` : ''}</dd></>}

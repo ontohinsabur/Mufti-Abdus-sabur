@@ -10,7 +10,7 @@ export default function OrderList({ orders, base, admin, reorderBase }) {
         <div className="row" key={o.id}>
           <Link href={`${base}/${o.id}`} style={{ color: 'inherit', flex: 1, minWidth: 220 }}>
             <b>#{o.order_no} · {o.service_name}</b> <OrderStatus status={o.status} />
-            {admin && o.profiles && <div className="muted">👤 {o.profiles.full_name || o.profiles.email}</div>}
+            {admin && o.profiles && <div className="muted">👤 {o.profiles.full_name || o.profiles.email}<VerifiedBadge profile={o.profiles} size={14} /></div>}
             <div className="muted">
               {o.page_name && <>📄 {o.page_name} · </>}
               {o.budget_usd ? <>{usd(o.budget_usd)} · {bnNum(o.duration_days)} দিন · </> : null}

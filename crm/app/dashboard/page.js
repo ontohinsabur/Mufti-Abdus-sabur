@@ -22,7 +22,7 @@ export default async function Dashboard() {
       <TopBar profile={profile} active="/dashboard" />
       <main className="wrap">
         <div className="card">
-          <h1>আসসালামু আলাইকুম, {profile.full_name || 'গ্রাহক'} <StatusBadge status={profile.status} /></h1>
+          <h1>আসসালামু আলাইকুম, {profile.full_name || 'গ্রাহক'}<VerifiedBadge profile={profile} size={20} />{profile.status !== 'approved' && <> <StatusBadge status={profile.status} /></>}</h1>
           <p className="muted">আপনার অর্ডার, পেমেন্ট আর হিসাব এখান থেকে দেখতে পারবেন।</p>
         </div>
         {(notices || []).map((n) => <div key={n.id} className="card notice"><b>📢 {n.title}</b><p style={{ whiteSpace: 'pre-line', margin: '6px 0 0' }}>{n.body}</p></div>)}

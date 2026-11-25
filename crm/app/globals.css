@@ -117,3 +117,4 @@ table.t { width: 100%; border-collapse: collapse; } table.t td, table.t th { pad
 .bubble.me { background: var(--brand); color: #fff; margin-left: auto; }
 .bubble.them { background: var(--bg); border: 1px solid var(--line); }
 @media print { .topbar, .noprint { display: none !important; } body { background: #fff; color: #000; } .card, .stat { border-color: #ccc; } }
+.vb { display: inline-block; vertical-align: -0.18em; margin-left: 4px; flex: 0 0 auto; }

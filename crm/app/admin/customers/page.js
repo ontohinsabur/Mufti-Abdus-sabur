@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/admin';
 import TopBar from '@/components/TopBar';
 import StatusBadge from '@/components/StatusBadge';
 import { setStatus } from '../actions';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 const TABS = [['pending', 'অপেক্ষমাণ'], ['approved', 'অনুমোদিত'], ['rejected', 'বাতিল'], ['all', 'সবাই']];
 
@@ -34,7 +35,7 @@ export default async function Customers({ searchParams }) {
           {(rows || []).map((c) => (
             <div className="row" key={c.id}>
               <div>
-                <Link href={`/admin/customers/${c.id}`}><b>{c.full_name || '(নাম নেই)'}</b></Link> <StatusBadge status={c.status} />
+                <Link href={`/admin/customers/${c.id}`}><b>{c.full_name || '(নাম নেই)'}</b></Link><VerifiedBadge profile={c} /> <StatusBadge status={c.status} />
                 <div className="muted">{c.email}{c.phone ? ` · ${c.phone}` : ''} · পেজ: {(c.facebook_pages?.[0]?.count || 0).toLocaleString('bn-BD')}</div>
                 <div className="muted">যোগ দিয়েছেন: {new Date(c.created_at).toLocaleDateString('bn-BD')}</div>
               </div>

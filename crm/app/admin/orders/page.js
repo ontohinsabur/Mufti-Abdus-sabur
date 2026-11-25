@@ -8,7 +8,7 @@ export default async function AdminOrders({ searchParams }) {
   const { supabase, profile } = await requireAdmin();
   const sp = await searchParams; const st = sp?.status || 'active';
   const q = (sp?.q || '').replace(/[,()%*\\]/g, ' ').trim().slice(0, 60);
-  let query = supabase.from('orders').select('*, profiles!orders_customer_id_fkey(full_name, email)').order('created_at', { ascending: false }).limit(200);
+  let query = supabase.from('orders').select('*, profiles!orders_customer_id_fkey(full_name, email, status, role)').order('created_at', { ascending: false }).limit(200);
   if (st === 'active') query = query.in('status', ['pending', 'accepted', 'running', 'off']);
   else if (st !== 'all') query = query.eq('status', st);
   if (q) query = /^\d+$/.test(q) ? query.eq('order_no', Number(q)) : query.or(`page_name.ilike.%${q}%,service_name.ilike.%${q}%`);
