@@ -25,7 +25,7 @@ export function ServiceForm({ s }) {
 export function AccessForm({ v }) {
   const [st, act, busy] = useActionState(saveAccess, null);
   return (
-    <form action={act} className="card">
+    <form action={act} className="card" id="access">
       <h2>এক্সেস আইডি</h2>
       <p className="muted">অর্ডারের আগে গ্রাহক "না" বললে এই লিংক আর আইডি দেখানো হবে।</p>
       <Msg s={st} />

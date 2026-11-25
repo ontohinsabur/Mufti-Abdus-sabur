@@ -10,7 +10,10 @@ export const viewport = { themeColor: '#0B1220', width: 'device-width', initialS
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="bn">
+    <html lang="bn" data-theme="dark" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: "try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}" }} />
+      </head>
       <body>{children}</body>
     </html>
   );

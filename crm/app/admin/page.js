@@ -1,32 +1,73 @@
 import Link from 'next/link';
 import { requireAdmin } from '@/lib/admin';
 import TopBar from '@/components/TopBar';
+import Tile from '@/components/Tile';
 
 const n = (x) => (x || 0).toLocaleString('bn-BD');
+const tk = (x) => '৳' + Number(x || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
+// Start of today / this month in Dhaka (UTC+6), as ISO strings
+function dhakaStarts() {
+  const now = new Date(Date.now() + 6 * 3600e3);
+  const day = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) - 6 * 3600e3);
+  const month = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1) - 6 * 3600e3);
+  return { day: day.toISOString(), month: month.toISOString() };
+}
+
+const TILES = [
+  ['/admin/orders/new', 'অর্ডার করুন', 'plus', 'blue', true],
+  ['/admin/orders', 'অর্ডার', 'orders', 'navy'],
+  ['/admin/payments', 'পেমেন্ট যাচাই', 'check', 'green'],
+  ['/admin/customers', 'কাস্টমার', 'users', 'violet'],
+  ['/admin/invoices', 'ইনভয়েস', 'invoice', 'amber'],
+  ['/admin/payments?tab=due', 'বাকি (Pay Later)', 'clock', 'rose'],
+  ['/admin/reports', 'রিপোর্ট', 'chart', 'teal'],
+  ['/admin/more', 'আরও', 'grid', 'slate'],
+];
 
 export default async function AdminHome() {
   const { supabase, profile } = await requireAdmin();
-  const count = async (status) => (await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'customer').eq('status', status)).count;
-  const oc = async (st) => (await supabase.from('orders').select('*', { count: 'exact', head: true }).in('status', st)).count;
-  const [approved, pending, rejected, newOrders, running, { count: toVerify }, { count: wreq }] = await Promise.all([count('approved'), count('pending'), count('rejected'), oc(['pending']), oc(['running']),
-    supabase.from('payments').select('*', { count: 'exact', head: true }).eq('status', 'submitted'),
-    supabase.from('wallet_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending')]);
+  const { day, month } = dhakaStarts();
+  const head = { count: 'exact', head: true };
+  const [today, waiting, verify, pendingCust, wreq, open, monthOrders, monthPays] = await Promise.all([
+    supabase.from('orders').select('*', head).gte('created_at', day),
+    supabase.from('orders').select('*', head).eq('status', 'pending'),
+    supabase.from('payments').select('*', head).eq('status', 'submitted'),
+    supabase.from('profiles').select('*', head).eq('role', 'customer').eq('status', 'pending'),
+    supabase.from('wallet_requests').select('*', head).eq('status', 'pending'),
+    supabase.from('orders').select('total_bdt, paid_amount').not('status', 'in', '(off,cancelled)'),
+    supabase.from('orders').select('total_bdt').gte('created_at', month).neq('status', 'cancelled'),
+    supabase.from('payments').select('amount').eq('status', 'verified').gte('created_at', month),
+  ]);
+  const due = (open.data || []).reduce((s, o) => s + Math.max(0, Number(o.total_bdt || 0) - Number(o.paid_amount || 0)), 0);
+  const sales = (monthOrders.data || []).reduce((s, o) => s + Number(o.total_bdt || 0), 0);
+  const got = (monthPays.data || []).reduce((s, p) => s + Number(p.amount || 0), 0);
+  const date = new Date().toLocaleDateString('bn-BD', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Dhaka' });
+  const counts = { '/admin/payments': verify.count, '/admin/customers': pendingCust.count, '/admin/orders': waiting.count };
+
   return (
     <>
       <TopBar profile={profile} active="/admin" />
       <main className="wrap">
-        <div className="card"><h1>অ্যাডমিন ড্যাশবোর্ড</h1><p className="muted">আসসালামু আলাইকুম, {profile.full_name || 'অ্যাডমিন'}।</p></div>
-        {toVerify > 0 && <div className="alert warn">{n(toVerify)}টি পেমেন্ট যাচাইয়ের অপেক্ষায়। <Link href="/admin/payments">যাচাই করুন →</Link></div>}
-        {wreq > 0 && <div className="alert warn">{n(wreq)}টি টাকা তোলার অনুরোধ আছে। <Link href="/admin/wallet">দেখুন →</Link></div>}
-        {newOrders > 0 && <div className="alert warn">{n(newOrders)}টি নতুন অর্ডার অপেক্ষায় আছে। <Link href="/admin/orders?status=pending">দেখুন →</Link></div>}
-        {pending > 0 && <div className="alert warn">{n(pending)} জন নতুন গ্রাহক অনুমোদনের অপেক্ষায় আছেন। <Link href="/admin/customers?status=pending">এখনই দেখুন →</Link></div>}
-        <div className="grid">
-          <Link href="/admin/customers?status=approved" className="stat"><span className="muted">অনুমোদিত গ্রাহক</span><b>{n(approved)}</b></Link>
-          <Link href="/admin/customers?status=pending" className="stat"><span className="muted">অপেক্ষমাণ</span><b>{n(pending)}</b></Link>
-          <Link href="/admin/customers?status=rejected" className="stat"><span className="muted">বাতিল</span><b>{n(rejected)}</b></Link>
-          <Link href="/admin/orders?status=pending" className="stat"><span className="muted">নতুন অর্ডার</span><b>{n(newOrders)}</b></Link>
-          <Link href="/admin/payments?tab=due" className="stat"><span className="muted">বকেয়া দেখুন</span><b>৳</b></Link>
-          <Link href="/admin/orders?status=running" className="stat"><span className="muted">এড রানিং</span><b>{n(running)}</b></Link>
+        <section className="hero">
+          <h1>আসসালামু আলাইকুম, {profile.full_name || 'অ্যাডমিন'}</h1>
+          <p>{date}</p>
+        </section>
+
+        {pendingCust.count > 0 && <div className="alert warn">{n(pendingCust.count)} জন নতুন গ্রাহক অনুমোদনের অপেক্ষায়। <Link href="/admin/customers?status=pending">এখনই দেখুন →</Link></div>}
+        {wreq.count > 0 && <div className="alert warn">{n(wreq.count)}টি টাকা তোলার অনুরোধ আছে। <Link href="/admin/wallet">দেখুন →</Link></div>}
+
+        <div className="stats">
+          <Link href="/admin/orders" className="stat"><span>আজকের অর্ডার</span><b>{n(today.count)}</b></Link>
+          <Link href="/admin/orders?status=pending" className="stat"><span>অপেক্ষমাণ অর্ডার</span><b className={waiting.count ? 'warn' : ''}>{n(waiting.count)}</b></Link>
+          <Link href="/admin/payments" className="stat"><span>যাচাই বাকি</span><b className={verify.count ? 'warn' : ''}>{n(verify.count)}</b></Link>
+          <Link href="/admin/payments?tab=due" className="stat"><span>মোট বকেয়া</span><b>{tk(due)}</b></Link>
+          <Link href="/admin/reports" className="stat"><span>এ মাসের বিক্রি</span><b>{tk(sales)}</b><small>{n((monthOrders.data || []).length)}টি অর্ডার</small></Link>
+          <Link href="/admin/reports" className="stat"><span>এ মাসে আদায়</span><b className="ok">{tk(got)}</b></Link>
+        </div>
+
+        <div className="tiles">
+          {TILES.map(([href, label, icon, tone, solid]) => <Tile key={href} href={href} label={label} icon={icon} tone={tone} solid={solid} count={counts[href]} />)}
         </div>
       </main>
     </>
