@@ -446,3 +446,8 @@ body:has(.sidebar) .wrap { max-width: 1200px; }
 @media (max-width: 1100px) { .hero-chips { grid-template-columns: repeat(2, 1fr); width: 100%; } }
 @media (max-width: 999px) { .hero-chips .pc-only { display: none; } }
 @media (min-width: 1000px) { .topactions .menu-btn, .topactions .ta-brand { display: none !important; } }
+
+:root[data-theme="dark"] .oc-steps .done i { background: #2563eb; }
+.oc-steps i.run { position: relative; overflow: hidden; }
+.oc-steps i.run u { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: linear-gradient(90deg, #2563eb, #60a5fa); transition: width 1s linear; }
+.oc.st-off .oc-steps i.run u { background: #94a3b8; }

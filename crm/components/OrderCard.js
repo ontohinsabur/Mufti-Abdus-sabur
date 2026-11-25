@@ -3,6 +3,7 @@ import Icon from './Icon';
 import PostThumb from './PostThumb';
 import CopyButton from './CopyButton';
 import WaButton from './WaButton';
+import RunBar from './RunBar';
 import VerifiedBadge from './VerifiedBadge';
 import { bnNum } from '@/lib/format';
 
@@ -41,7 +42,14 @@ export default function OrderCard({ o, admin = true }) {
 
       {o.status === 'cancelled' ? <p className="oc-cancel">এই অর্ডার বাতিল করা হয়েছে।</p> : (
         <div className="oc-steps">
-          {STEPS.map((s, i) => <span key={s} className={`${i <= step ? 'done' : ''} ${i === step ? 'cur' : ''}`}><i />{s}</span>)}
+          {STEPS.map((s, i) => {
+            const live = i === 2 && (o.status === 'running' || o.status === 'off') && o.run_start && o.run_end;
+            return (
+              <span key={s} className={`${i < step || (i === step && !live) ? 'done' : ''} ${i === step ? 'cur' : ''}`}>
+                {live ? <RunBar start={o.run_start} end={o.run_end} paused={o.status === 'off' ? o.paused_at : null} /> : <i />}{s}
+              </span>
+            );
+          })}
         </div>
       )}
       {t && <p className="oc-time">⏱ {t.text} বাকি{o.paused_at ? ' (থেমে আছে)' : ''} · শেষ {short(o.run_end)}</p>}
