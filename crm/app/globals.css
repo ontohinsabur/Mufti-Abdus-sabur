@@ -345,3 +345,6 @@ body:has(.sidebar) .wrap { max-width: 1200px; }
   .of-sum { grid-template-columns: 1fr; } .of-sum b { font-size: 1.2rem; }
   .of-submit { flex-direction: column-reverse; }
 }
+.cust-row { color: var(--text); flex-wrap: nowrap; }
+.cust-row b { color: #3b82f6; }
+.cust-go { font-size: 2rem; line-height: 1; color: var(--muted); }

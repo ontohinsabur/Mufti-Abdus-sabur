@@ -12,6 +12,7 @@ import { PayLaterForm, AdjustForm } from '@/components/AdminMoney';
 import { buildLedger } from '@/lib/money';
 import { bnNum } from '@/lib/format';
 import VerifiedBadge from '@/components/VerifiedBadge';
+import { setStatus } from '../../actions';
 
 export default async function Customer({ params }) {
   const { supabase, profile } = await requireAdmin();
@@ -40,6 +41,15 @@ export default async function Customer({ params }) {
           <p className="muted">পেজ: {(pages || []).map((p) => p.name).join(', ') || 'নেই'}</p>
           <Link className="btn sm" href={`/admin/orders/new?customer=${c.id}`}>+ এই গ্রাহকের জন্য অর্ডার</Link>{' '}
           <WaButton number={c.whatsapp || c.phone} text={`আসসালামু আলাইকুম ${c.full_name || ''}`} />
+        </div>
+        <div className="card">
+          <h2>অ্যাকাউন্টের অবস্থা</h2>
+          <p className="muted">{c.status === 'approved' ? 'অনুমোদিত, নামের পাশে নীল ব্যাজ দেখাচ্ছে।' : c.status === 'pending' ? 'অনুমোদনের অপেক্ষায় আছে।' : 'বাতিল করা হয়েছে।'}</p>
+          <div className="actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {[['approved', 'ok', '✔ অনুমোদন দিন'], ['rejected', 'bad', 'বাতিল'], ['pending', 'ghost', 'অপেক্ষমাণে রাখুন']].filter(([to]) => to !== c.status).map(([to, cls, label]) => (
+              <form key={to} action={setStatus}><input type="hidden" name="id" value={c.id} /><input type="hidden" name="status" value={to} /><button className={`btn sm ${cls}`}>{label}</button></form>
+            ))}
+          </div>
         </div>
         <div className="grid">
           <div className="stat"><span className="muted">বকেয়া</span><b>৳{bnNum(sum?.due)}</b></div>

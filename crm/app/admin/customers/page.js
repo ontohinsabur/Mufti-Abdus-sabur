@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { requireAdmin } from '@/lib/admin';
 import TopBar from '@/components/TopBar';
 import StatusBadge from '@/components/StatusBadge';
-import { setStatus } from '../actions';
 import VerifiedBadge from '@/components/VerifiedBadge';
 
 const TABS = [['pending', 'অপেক্ষমাণ'], ['approved', 'অনুমোদিত'], ['rejected', 'বাতিল'], ['all', 'সবাই']];
@@ -20,9 +19,6 @@ export default async function Customers({ searchParams }) {
   if (status !== 'all') query = query.eq('status', status);
   if (q) query = query.or(`full_name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%`);
   const { data: rows } = await query;
-  const Btn = ({ id, to, cls, children }) => (
-    <form action={setStatus}><input type="hidden" name="id" value={id} /><input type="hidden" name="status" value={to} /><button className={`btn sm ${cls}`}>{children}</button></form>
-  );
   return (
     <>
       <TopBar profile={profile} active="/admin/customers" />
@@ -33,18 +29,14 @@ export default async function Customers({ searchParams }) {
         <div className="list">
           {(rows || []).length === 0 && <p className="muted">এই তালিকায় কেউ নেই।</p>}
           {(rows || []).map((c) => (
-            <div className="row" key={c.id}>
+            <Link className="row cust-row" key={c.id} href={`/admin/customers/${c.id}`}>
               <div>
-                <Link href={`/admin/customers/${c.id}`}><b>{c.full_name || '(নাম নেই)'}</b></Link><VerifiedBadge profile={c} /> <StatusBadge status={c.status} />
+                <b>{c.full_name || '(নাম নেই)'}</b><VerifiedBadge profile={c} /> <StatusBadge status={c.status} />
                 <div className="muted">{c.email}{c.phone ? ` · ${c.phone}` : ''} · পেজ: {(c.facebook_pages?.[0]?.count || 0).toLocaleString('bn-BD')}</div>
                 <div className="muted">যোগ দিয়েছেন: {new Date(c.created_at).toLocaleDateString('bn-BD')}</div>
               </div>
-              <div className="actions">
-                {c.status !== 'approved' && <Btn id={c.id} to="approved" cls="ok">✔ অনুমোদন দিন</Btn>}
-                {c.status !== 'rejected' && <Btn id={c.id} to="rejected" cls="bad">বাতিল</Btn>}
-                {c.status !== 'pending' && <Btn id={c.id} to="pending" cls="ghost">অপেক্ষমাণে রাখুন</Btn>}
-              </div>
-            </div>
+              <span className="cust-go" aria-hidden="true">›</span>
+            </Link>
           ))}
         </div>
       </main>

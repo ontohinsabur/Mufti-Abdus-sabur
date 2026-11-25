@@ -11,5 +11,5 @@ export async function setStatus(form) {
     approved_by: status === 'approved' ? user.id : null,
   }).eq('id', id);
   await supabase.from('audit_log').insert({ actor: user.id, action: 'customer_status', target: id, details: { status } });
-  revalidatePath('/admin'); revalidatePath('/admin/customers');
+  revalidatePath('/admin'); revalidatePath('/admin/customers'); revalidatePath(`/admin/customers/${id}`);
 }
