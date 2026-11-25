@@ -4,6 +4,7 @@ import { getSession } from '@/lib/supabase/server';
 import TopBar from '@/components/TopBar';
 import StatusBadge from '@/components/StatusBadge';
 import { WHATSAPP } from '@/lib/config';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 export default async function Dashboard() {
   const { user, profile, supabase } = await getSession();

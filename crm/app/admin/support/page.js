@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { requireAdmin } from '@/lib/admin';
 import TopBar from '@/components/TopBar';
 import { bnDate } from '@/lib/format';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 export default async function AdminSupport({ searchParams }) {
   const { supabase, profile } = await requireAdmin();

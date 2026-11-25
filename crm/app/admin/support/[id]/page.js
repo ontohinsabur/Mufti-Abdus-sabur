@@ -6,6 +6,7 @@ import SupportForm from '@/components/SupportForm';
 import SupportThread from '@/components/SupportThread';
 import WaButton from '@/components/WaButton';
 import { setTicketStatus } from '@/app/support/actions';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 export default async function AdminTicket({ params }) {
   const { supabase, user, profile } = await requireAdmin();

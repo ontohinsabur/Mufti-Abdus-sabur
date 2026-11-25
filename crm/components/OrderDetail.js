@@ -1,5 +1,6 @@
 import OrderStatus from '@/components/OrderStatus';
 import { taka, usd, bnDate, timeLeft, PAY, bnNum } from '@/lib/format';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 const SRC = { customer: 'গ্রাহকের নিজস্ব রেট', service: 'সাধারণ রেট', manual: 'অ্যাডমিন ঠিক করেছেন' };
 

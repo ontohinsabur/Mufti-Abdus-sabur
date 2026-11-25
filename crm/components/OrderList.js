@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import OrderStatus from '@/components/OrderStatus';
 import { taka, usd, bnDate, timeLeft, PAY, bnNum } from '@/lib/format';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 export default function OrderList({ orders, base, admin, reorderBase }) {
   if (!orders?.length) return <p className="muted">কোনো অর্ডার নেই।</p>;
