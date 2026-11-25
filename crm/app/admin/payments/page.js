@@ -11,7 +11,11 @@ const TABS = [['submitted', 'যাচাই বাকি'], ['verified', 'য�
 
 export default async function AdminPayments({ searchParams }) {
   const { supabase, profile } = await requireAdmin();
-  const sp = await searchParams; const tab = sp?.tab || 'submitted';
+  const sp = await searchParams; let tab = sp?.tab;
+  if (!tab) {
+    const { count } = await supabase.from('payments').select('id', { count: 'exact', head: true }).eq('status', 'submitted');
+    tab = count ? 'submitted' : 'verified';
+  }
   const { data: customers } = await supabase.from('profiles').select('id, full_name, email, phone').eq('role', 'customer').order('full_name');
   const cname = Object.fromEntries((customers || []).map((c) => [c.id, c.full_name || c.email]));
   let body;
