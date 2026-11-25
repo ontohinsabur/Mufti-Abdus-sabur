@@ -4,6 +4,7 @@ import OrderCard from '@/components/OrderCard';
 import Icon from '@/components/Icon';
 import AutoSelect from '@/components/AutoSelect';
 import { bnNum } from '@/lib/format';
+import Pager, { paginate } from '@/components/Pager';
 
 export const metadata = { title: 'অর্ডার | MAS CRM' };
 const OPTS = [['all', 'সব অর্ডার'], ['active', 'চলমান কাজ'], ['pending', 'অপেক্ষমাণ'], ['accepted', 'গৃহীত'], ['running', 'এড রানিং'], ['off', 'অফ'], ['completed', 'সম্পন্ন'], ['cancelled', 'বাতিল'], ['due', 'বকেয়া আছে']];
@@ -22,6 +23,7 @@ export default async function AdminOrders({ searchParams }) {
   const digits = k.replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d));
   const orders = (data || []).filter((o) => !k || String(o.order_no) === digits || [o.profiles?.full_name, o.profiles?.email, o.profiles?.phone, o.post_url, o.customer_note, o.admin_note, o.page_name, o.service_name, o.invoice_no]
     .some((x) => (x || '').toLowerCase().includes(k)));
+  const pg = paginate(orders, sp, 12);
   return (
     <>
       <TopBar profile={profile} active="/admin/orders" />
@@ -34,7 +36,8 @@ export default async function AdminOrders({ searchParams }) {
         </form>
         {(st !== 'all' || q) && <p className="muted" style={{ margin: '0 4px 12px' }}>{bnNum(orders.length)}টি অর্ডার পাওয়া গেছে</p>}
         {orders.length === 0 ? <div className="panel"><p className="panel-empty">কোনো অর্ডার পাওয়া যায়নি।</p></div>
-          : <div className="oc-grid">{orders.map((o) => <OrderCard key={o.id} o={o} />)}</div>}
+          : <div className="oc-grid">{pg.rows.map((o) => <OrderCard key={o.id} o={o} />)}</div>}
+        <Pager page={pg.page} pages={pg.pages} base="/admin/orders" sp={sp} />
       </main>
     </>
   );

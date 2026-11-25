@@ -33,9 +33,9 @@ export default function OrderCard({ o, admin = true }) {
       <div className="oc-head">
         <PostThumb url={o.post_url} />
         <div className="oc-who">
-          <b>{admin ? (c.full_name || c.email) : o.service_name}{admin && <VerifiedBadge profile={c} size={18} />}</b>
+          <b>{admin ? (c.full_name || c.email) : (o.page_name || o.service_name)}{admin && <VerifiedBadge profile={c} size={18} />}</b>
           <small>{o.service_name} · #{bnNum(o.order_no)} · {stamp(o.created_at)}</small>
-          {o.page_name && <span className="oc-page"><i>f</i>{o.page_name}</span>}
+          {o.page_name && admin && <span className="oc-page"><i>f</i>{o.page_name}</span>}
         </div>
         <Link href={`${base}/new?from=${o.id}`} className="oc-ic round" title="আবার অর্ডার" aria-label="আবার অর্ডার"><Icon name="refresh" size={20} /></Link>
       </div>

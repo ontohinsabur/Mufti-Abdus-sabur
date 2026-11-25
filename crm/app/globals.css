@@ -509,3 +509,11 @@ body:has(.sidebar) .wrap { max-width: 1200px; }
   .od-status { grid-template-columns: repeat(3, 1fr); }
   .od-amt { text-align: left; }
 }
+.oc-steps.big span { font-size: 1rem; } .oc-steps.big i { height: 7px; }
+.pager { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin: 18px 0 8px; }
+.pager a, .pager span { min-width: 40px; height: 40px; padding: 0 10px; display: grid; place-items: center; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--text); font-weight: 700; }
+.pager span { border: 0; background: none; color: var(--muted); }
+.pager a.on { background: #2563eb; border-color: #2563eb; color: #fff; }
+.install-wrap { position: relative; }
+.install-tip { position: absolute; right: 0; top: calc(100% + 8px); width: 240px; z-index: 50; padding: 10px 12px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(2,6,23,.35); font-size: .9rem; }
+.icon-btn.install { color: #22c55e; }

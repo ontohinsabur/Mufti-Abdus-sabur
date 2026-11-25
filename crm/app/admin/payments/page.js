@@ -6,6 +6,7 @@ import { PayTogether } from '@/components/PayForms';
 import { METHOD } from '@/components/PayMethod';
 import { dueOrders } from '@/lib/money';
 import { bnNum, bnDate } from '@/lib/format';
+import Pager, { paginate } from '@/components/Pager';
 
 const TABS = [['overview', 'সারসংক্ষেপ'], ['verified', 'পেমেন্ট ইতিহাস'], ['submitted', 'যাচাই বাকি'], ['rejected', 'বাতিল পেমেন্ট'], ['record', '+ পেমেন্ট রেকর্ড']];
 const money = (x) => '৳' + Number(x || 0).toLocaleString('en-US', { maximumFractionDigits: 2 });
@@ -44,6 +45,7 @@ export default async function AdminPayments({ searchParams }) {
     all.forEach((o) => { cnt[o.payment_status] = (cnt[o.payment_status] || 0) + 1; });
     const list = all.filter((o) => (pf === 'all' || o.payment_status === pf) && (!q || String(o.order_no) === q
       || [cname[o.customer_id], o.service_name, o.page_name, o.invoice_no, ...(o.payment_allocations || []).map((a) => a.payments?.trx_id)].some((x) => (x || '').toLowerCase().includes(q))));
+    const pg = paginate(list, sp, 10);
     body = (<>
       <section className="panel">
         <div className="panel-h"><h2>যাচাইয়ের অপেক্ষায় ({bnNum(subs?.length || 0)})</h2></div>
@@ -85,7 +87,7 @@ export default async function AdminPayments({ searchParams }) {
         </form>
         {list.length === 0 ? <p className="panel-empty">কিছু পাওয়া যায়নি।</p> : (
           <div className="pc-grid">
-            {list.map((o) => {
+            {pg.rows.map((o) => {
               const d = Math.max(0, Number(o.total_bdt) - Number(o.paid_amount));
               const [lbl, tone] = PS[o.payment_status] || PS.unpaid;
               return (
@@ -111,6 +113,7 @@ export default async function AdminPayments({ searchParams }) {
             })}
           </div>
         )}
+        <Pager page={pg.page} pages={pg.pages} base="/admin/payments" sp={sp} />
       </section>
     </>);
   } else if (tab === 'due') {

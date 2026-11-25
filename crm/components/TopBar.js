@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import Icon from './Icon';
 import ThemeToggle from './ThemeToggle';
 import NotifyLive from './NotifyLive';
+import InstallApp from './InstallApp';
 
 // App shell in the old MAS CRM style: left sidebar, top actions, mobile bottom bar.
 const ADMIN = [
@@ -65,6 +66,7 @@ export default async function TopBar({ profile, active }) {
         <label htmlFor="navtoggle" className="icon-btn menu-btn" aria-label="মেনু"><Icon name="menu" /></label>
         <Link href={home} className="ta-brand"><span className="sb-logo sm">m</span><b>MAS CRM</b></Link>
         <span className="ta-space" />
+        <InstallApp />
         <ThemeToggle />
         <Link href="/notifications" className="icon-btn bell" aria-label="নোটিফিকেশন">
           <Icon name="bell" />{unread > 0 && <span className="count">{unread > 99 ? '৯৯+' : unread.toLocaleString('bn-BD')}</span>}

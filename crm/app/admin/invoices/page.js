@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/admin';
 import TopBar from '@/components/TopBar';
 import Icon from '@/components/Icon';
 import { bnNum } from '@/lib/format';
+import Pager, { paginate } from '@/components/Pager';
 
 export const metadata = { title: 'ইনভয়েস | MAS CRM' };
 const money = (x) => '৳' + Number(x || 0).toLocaleString('en-US', { maximumFractionDigits: 2 });
@@ -20,6 +21,7 @@ export default async function Invoices({ searchParams }) {
   const rows = found.filter((o) => tab === 'all' || (tab === 'due' ? o.due > 0.009 : o.due <= 0.009));
   const total = found.reduce((a, o) => a + Number(o.total_bdt || 0), 0);
   const due = found.reduce((a, o) => a + o.due, 0);
+  const pg = paginate(rows, sp, 10);
   const qs = sp?.q ? `&q=${encodeURIComponent(sp.q)}` : '';
   return (
     <>
@@ -40,7 +42,7 @@ export default async function Invoices({ searchParams }) {
         <section className="panel">
           {rows.length === 0 ? <p className="panel-empty">এই তালিকায় কোনো ইনভয়েস নেই।</p> : (
             <div className="plist">
-              {rows.map((o) => (
+              {pg.rows.map((o) => (
                 <Link key={o.id} href={`/invoice/${o.id}`} className="pl-row inv-row">
                   <span><b className="mono">{o.invoice_no || `#${o.order_no}`}</b>
                     <small>{o.profiles?.full_name || o.profiles?.email} · #{bnNum(o.order_no)} · {new Date(o.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Dhaka' })}{o.status === 'cancelled' ? ' · বাতিল' : ''}</small></span>
@@ -50,6 +52,7 @@ export default async function Invoices({ searchParams }) {
             </div>
           )}
         </section>
+        <Pager page={pg.page} pages={pg.pages} base="/admin/invoices" sp={sp} />
       </main>
     </>
   );

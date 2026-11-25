@@ -13,6 +13,7 @@ import { buildLedger } from '@/lib/money';
 import { bnNum } from '@/lib/format';
 import VerifiedBadge from '@/components/VerifiedBadge';
 import { setStatus } from '../../actions';
+import CustomerEdit from './edit';
 
 export default async function Customer({ params }) {
   const { supabase, profile } = await requireAdmin();
@@ -34,7 +35,7 @@ export default async function Customer({ params }) {
   return (
     <>
       <TopBar profile={profile} active="/admin/customers" />
-      <main className="wrap narrow">
+      <main className="wrap" style={{ maxWidth: 900 }}>
         <div className="card">
           <h1>{c.full_name || '(নাম নেই)'}<VerifiedBadge profile={c} size={20} /> <StatusBadge status={c.status} /></h1>
           <p className="muted">{c.email}{c.phone ? ` · ${c.phone}` : ''}{c.whatsapp ? ` · WhatsApp ${c.whatsapp}` : ''}</p>
@@ -42,6 +43,7 @@ export default async function Customer({ params }) {
           <Link className="btn sm" href={`/admin/orders/new?customer=${c.id}`}>+ এই গ্রাহকের জন্য অর্ডার</Link>{' '}
           <WaButton number={c.whatsapp || c.phone} text={`আসসালামু আলাইকুম ${c.full_name || ''}`} />
         </div>
+        <CustomerEdit c={c} />
         <div className="card">
           <h2>অ্যাকাউন্টের অবস্থা</h2>
           <p className="muted">{c.status === 'approved' ? 'অনুমোদিত, নামের পাশে নীল ব্যাজ দেখাচ্ছে।' : c.status === 'pending' ? 'অনুমোদনের অপেক্ষায় আছে।' : 'বাতিল করা হয়েছে।'}</p>
