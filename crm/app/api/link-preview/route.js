@@ -46,8 +46,13 @@ export async function GET(request) {
       image: meta(html, 'og:image'),
       page_name: guessPage(decode(title), html).slice(0, 150),
     };
+    if (new URL(request.url).searchParams.get('img')) {
+      if (!out.image) return new NextResponse(null, { status: 404 });
+      return NextResponse.redirect(out.image, { status: 302, headers: { 'Cache-Control': 'private, max-age=3600' } });
+    }
     return NextResponse.json(out, { headers: { 'Cache-Control': 'private, max-age=600' } });
   } catch {
+    if (new URL(request.url).searchParams.get('img')) return new NextResponse(null, { status: 404 });
     return NextResponse.json({ title: '', description: '', image: '', page_name: '' });
   }
 }

@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { requireAdmin } from '@/lib/admin';
 import TopBar from '@/components/TopBar';
 import Tile from '@/components/Tile';
+import OrderCard, { left } from '@/components/OrderCard';
+import { bnNum } from '@/lib/format';
 
 const n = (x) => (x || 0).toLocaleString('bn-BD');
 const tk = (x) => '৳' + Number(x || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
@@ -29,7 +31,8 @@ export default async function AdminHome() {
   const { supabase, profile } = await requireAdmin();
   const { day, month } = dhakaStarts();
   const head = { count: 'exact', head: true };
-  const [today, waiting, verify, pendingCust, wreq, open, monthOrders, monthPays] = await Promise.all([
+  const P = 'profiles!orders_customer_id_fkey(full_name, email, phone, whatsapp, status, role)';
+  const [today, waiting, verify, pendingCust, wreq, open, monthOrders, monthPays, recent, ending, tickets] = await Promise.all([
     supabase.from('orders').select('*', head).gte('created_at', day),
     supabase.from('orders').select('*', head).eq('status', 'pending'),
     supabase.from('payments').select('*', head).eq('status', 'submitted'),
@@ -38,6 +41,9 @@ export default async function AdminHome() {
     supabase.from('orders').select('total_bdt, paid_amount').not('status', 'in', '(off,cancelled)'),
     supabase.from('orders').select('total_bdt').gte('created_at', month).neq('status', 'cancelled'),
     supabase.from('payments').select('amount').eq('status', 'verified').gte('created_at', month),
+    supabase.from('orders').select(`*, ${P}`).order('created_at', { ascending: false }).limit(6),
+    supabase.from('orders').select(`id, order_no, service_name, page_name, run_end, paused_at, ${P}`).eq('status', 'running').not('run_end', 'is', null).order('run_end').limit(5),
+    supabase.from('support_tickets').select('id, subject, status, last_message_at, profiles(full_name, email, status, role), support_messages(body, sender, created_at)').order('last_message_at', { ascending: false }).limit(5),
   ]);
   const due = (open.data || []).reduce((s, o) => s + Math.max(0, Number(o.total_bdt || 0) - Number(o.paid_amount || 0)), 0);
   const sales = (monthOrders.data || []).reduce((s, o) => s + Number(o.total_bdt || 0), 0);
@@ -69,6 +75,46 @@ export default async function AdminHome() {
         <div className="tiles">
           {TILES.map(([href, label, icon, tone, solid]) => <Tile key={href} href={href} label={label} icon={icon} tone={tone} solid={solid} count={counts[href]} />)}
         </div>
+
+        <section className="panel">
+          <div className="panel-h"><h2>সাম্প্রতিক অর্ডার</h2><Link href="/admin/orders">সব দেখুন</Link></div>
+          {(recent.data || []).length === 0 ? <p className="panel-empty">এখনো কোনো অর্ডার নেই।</p>
+            : <div className="oc-grid">{recent.data.map((o) => <OrderCard key={o.id} o={o} />)}</div>}
+        </section>
+
+        <section className="panel">
+          <div className="panel-h"><h2>এড রানিং · শিগগির শেষ</h2><Link href="/admin/orders?status=running">সব দেখুন</Link></div>
+          {(ending.data || []).length === 0 ? <p className="panel-empty">এখন কোনো এড চলছে না।</p> : (
+            <div className="plist">
+              {ending.data.map((o) => {
+                const t = left(o, true);
+                return (
+                  <Link key={o.id} href={`/admin/orders/${o.id}`} className="pl-row">
+                    <span><b>{o.profiles?.full_name || o.profiles?.email} · #{bnNum(o.order_no)}</b><small>{o.page_name || o.service_name}</small></span>
+                    {t && <em className={t.soon ? 'soon' : ''}>{t.text}{o.paused_at ? ' (থেমে আছে)' : ''}</em>}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <section className="panel">
+          <div className="panel-h"><h2>মেসেজ</h2><Link href="/admin/support">সব দেখুন</Link></div>
+          {(tickets.data || []).length === 0 ? <p className="panel-empty">এখনো কোনো মেসেজ আসেনি। কাস্টমার সাপোর্টে মেসেজ করলে এখানে দেখাবে।</p> : (
+            <div className="plist">
+              {tickets.data.map((t) => {
+                const last = [...(t.support_messages || [])].sort((a, b) => (a.created_at < b.created_at ? 1 : -1))[0];
+                return (
+                  <Link key={t.id} href={`/admin/support/${t.id}`} className="pl-row">
+                    <span><b>{t.profiles?.full_name || t.profiles?.email} · {t.subject}</b><small>{last ? `${last.sender === 'admin' ? 'আপনি: ' : ''}${last.body.slice(0, 90)}` : ''}</small></span>
+                    <em className={t.status === 'open' ? '' : 'mute'}>{t.status === 'open' ? 'চলমান' : 'বন্ধ'}</em>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </main>
     </>
   );
