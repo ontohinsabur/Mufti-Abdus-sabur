@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import Icon from './Icon';
 import ThemeToggle from './ThemeToggle';
+import NotifyLive from './NotifyLive';
 
 // App shell in the old MAS CRM style: left sidebar, top actions, mobile bottom bar.
 const ADMIN = [
@@ -71,6 +72,7 @@ export default async function TopBar({ profile, active }) {
         <Link href={newOrder} className="btn-new"><Icon name="plus" size={20} /><span>নতুন অর্ডার</span></Link>
       </header>
 
+      <NotifyLive userId={profile?.id} />
       <nav className="bottombar noprint">
         {bottom.map(([href, label, icon], i) => (
           <Link key={href} href={href} className={`${i === 2 ? 'fab' : ''} ${active === base(href) && i !== 2 ? 'on' : ''}`}>
