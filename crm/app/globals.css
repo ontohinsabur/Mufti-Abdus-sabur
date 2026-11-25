@@ -445,3 +445,4 @@ body:has(.sidebar) .wrap { max-width: 1200px; }
 .hero-chips b { font-size: 1.35rem; font-family: system-ui, 'SolaimanLipi', sans-serif; }
 @media (max-width: 1100px) { .hero-chips { grid-template-columns: repeat(2, 1fr); width: 100%; } }
 @media (max-width: 999px) { .hero-chips .pc-only { display: none; } }
+@media (min-width: 1000px) { .topactions .menu-btn, .topactions .ta-brand { display: none !important; } }
