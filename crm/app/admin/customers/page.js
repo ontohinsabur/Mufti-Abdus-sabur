@@ -9,7 +9,11 @@ const TABS = [['pending', 'অপেক্ষমাণ'], ['approved', 'অন�
 export default async function Customers({ searchParams }) {
   const { supabase, profile } = await requireAdmin();
   const sp = await searchParams;
-  const status = sp?.status || 'pending';
+  let status = sp?.status;
+  if (!status) {
+    const { count } = await supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'customer').eq('status', 'pending');
+    status = count ? 'pending' : 'approved';
+  }
   const q = (sp?.q || '').replace(/[,()%*\\]/g, ' ').trim().slice(0, 60);
   let query = supabase.from('profiles').select('*, facebook_pages(count)').eq('role', 'customer').order('created_at', { ascending: false });
   if (status !== 'all') query = query.eq('status', status);
