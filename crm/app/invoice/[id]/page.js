@@ -41,7 +41,9 @@ export default async function Invoice({ params }) {
         <a className="inv-tbtn" href={back}>← অর্ডারে ফিরে যান</a>
         <PrintButton />
       </div>
+      <div className="inv-wm"><span>muftiabdussabur.com</span></div>
       <article className="inv-paper">
+        <div className="inv-wmgrid" />
         <header className="inv-head">
           <div className="inv-logo"><img src="/brand-logo.svg" alt={b.name} /><small>{b.tagline}</small></div>
           <div className="inv-number">
@@ -125,6 +127,11 @@ body{background:#eef3ef!important}
 .inv-tools .btn{background:linear-gradient(135deg,#064e2d,#087747);color:#fff;border:0}
 .inv-paper{box-sizing:border-box;width:190mm;max-width:100%;min-height:277mm;margin:auto;background:#fff;color:#1f3328;border:1px solid #dce8df;border-radius:3mm;padding:10mm 11mm;font:9.5pt/1.5 Inter,"SolaimanLipi",sans-serif;display:flex;flex-direction:column;gap:4.5mm;box-shadow:0 5px 24px #064e2d18}
 .inv-paper *{box-sizing:border-box}
+.inv-paper{position:relative;overflow:hidden}
+.inv-paper>*:not(.inv-wmgrid){position:relative;z-index:1}
+.inv-wmgrid{position:absolute!important;inset:0;z-index:0!important;pointer-events:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='340' height='220'><text x='20' y='130' transform='rotate(-30 170 110)' font-family='Arial' font-size='22' font-weight='700' fill='%23064e2d' fill-opacity='0.04'>muftiabdussabur.com</text></svg>");background-repeat:repeat}
+.inv-wm{position:fixed;inset:0;pointer-events:none;z-index:2;display:flex;align-items:center;justify-content:center}
+.inv-wm span{transform:rotate(-32deg);font:800 64px/1 system-ui,sans-serif;letter-spacing:2px;color:#064e2d;opacity:.06;white-space:nowrap}
 .inv-head{display:flex;justify-content:space-between;align-items:center;gap:5mm;min-height:30mm}
 .inv-logo{position:relative;width:64mm;height:17mm;flex:0 0 64mm}
 .inv-logo img{display:block;width:64mm;height:17mm;object-fit:contain}
@@ -166,6 +173,7 @@ body{background:#eef3ef!important}
   @page{size:A4 portrait;margin:8mm}
   html,body,.inv-app{background:#fff!important;margin:0!important;padding:0!important}
   .no-print,.sidebar,.topactions,.bottombar{display:none!important}
+  .inv-wmgrid{position:absolute!important}
   .inv-paper{width:194mm!important;max-width:none!important;min-height:279mm!important;margin:0!important;padding:8mm 9mm!important;gap:4mm!important;border:0!important;border-radius:0!important;box-shadow:none!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
   .inv-grid{grid-template-columns:1fr 1fr!important}
   .inv-head,.inv-grid,.inv-finance,.inv-note,.inv-footer,.inv-table{break-inside:avoid!important;page-break-inside:avoid!important}

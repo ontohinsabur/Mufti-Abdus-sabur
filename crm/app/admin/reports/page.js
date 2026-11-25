@@ -1,6 +1,5 @@
 import { requireAdmin } from '@/lib/admin';
 import TopBar from '@/components/TopBar';
-import PrintButton from '@/components/PrintButton';
 import { METHOD } from '@/components/PayMethod';
 import { dueOrders } from '@/lib/money';
 import { bnNum, STATUS } from '@/lib/format';
@@ -39,7 +38,7 @@ export default async function Reports({ searchParams }) {
         <form className="card noprint" style={{ display: 'flex', gap: 8, alignItems: 'end', flexWrap: 'wrap' }}>
           <div><label>শুরু</label><input type="date" name="from" defaultValue={from} /></div>
           <div><label>শেষ</label><input type="date" name="to" defaultValue={to} /></div>
-          <button className="btn">দেখুন</button><PrintButton />
+          <button className="btn">দেখুন</button><a className="btn ok" href={`/admin/reports/print?from=${from}&to=${to}`} target="_blank" rel="noopener">⎙ প্রিন্ট / PDF ডাউনলোড</a>
         </form>
         <p className="muted">সময়: {new Date(start).toLocaleDateString('bn-BD')} — {new Date(end).toLocaleDateString('bn-BD')}</p>
         <div className="grid">
