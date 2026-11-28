@@ -2,6 +2,8 @@
   "cleanUrls": true,
   "trailingSlash": true,
   "redirects": [
+    { "source": "/services/facebook-engagement-campaign/", "destination": "/services/facebook-ads-campaign/", "permanent": true },
+    { "source": "/services/facebook-video-views-campaign/", "destination": "/services/facebook-ads-campaign/", "permanent": true },
     { "source": "/sitemap_index.xml", "destination": "/sitemap.xml", "permanent": true },
     { "source": "/wp-sitemap.xml", "destination": "/sitemap.xml", "permanent": true },
     { "source": "/:name([a-z_]+-sitemap\\d*).xml", "destination": "/sitemap.xml", "permanent": true },
